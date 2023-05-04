@@ -10,7 +10,7 @@ from telegram.ext import (
     ConversationHandler
 )
 
-NAME, BIRTH_DATE, LOCATION, PROFESSION = range(4)
+NAME, BIRTH_DATE, LOCATION, PROFESSION, VALIDATION = range(5)
 
 user = {
     'id': None,
@@ -36,15 +36,13 @@ async def validate_date(date_text, update: Update, context: ContextTypes.DEFAULT
         
     
 async def validate_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    reply_keyboard = [["Yes", "No"]]
-
-    await update.message.reply_text("Is everything correct?")
-    await update.message.reply_text(
-        "Your name: {0}\nYour birth date: {1}\nYour location: {2}\nYour profession: {3}".format(user["name"], user["birth"], user["location"], user["profession"]), 
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder="Yes or No?"
-        ),
-    )
+    if update.message.text == "Yes":
+        print("Operation successful!")
+        return ConversationHandler.END
+    else:
+        await update.message.reply_text("Let's try again")
+        await update.message.reply_text("Tell me your name")
+        return NAME
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -86,9 +84,17 @@ async def profession(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # getting user's name
     user["profession"] = update.message.text
 
-    await validate_info(update, context)
+    reply_keyboard = [["Yes", "No"]]
 
-    return ConversationHandler.END
+    await update.message.reply_text("Is everything correct?")
+    await update.message.reply_text(
+        "Your name: {0}\nYour birth date: {1}\nYour location: {2}\nYour profession: {3}".format(user["name"], user["birth"], user["location"], user["profession"]), 
+        reply_markup=ReplyKeyboardMarkup(
+            reply_keyboard, one_time_keyboard=True, input_field_placeholder="Yes or No?"
+        ),
+    )
+
+    return VALIDATION
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -106,7 +112,8 @@ if __name__ == '__main__':
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name)],
             BIRTH_DATE: [MessageHandler(filters.TEXT & ~filters.COMMAND, birth)],
             LOCATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, location)],
-            PROFESSION: [MessageHandler(filters.TEXT & ~filters.COMMAND, profession)]
+            PROFESSION: [MessageHandler(filters.TEXT & ~filters.COMMAND, profession)],
+            VALIDATION: [MessageHandler(filters.TEXT & ~filters.COMMAND, validate_info)]
         },
         fallbacks=[CommandHandler("cancel", cancel)]
     )
