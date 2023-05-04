@@ -9,6 +9,7 @@ from telegram.ext import (
     filters,
     ConversationHandler
 )
+from insert_user import insert_employee
 
 NAME, BIRTH_DATE, LOCATION, PROFESSION, VALIDATION = range(5)
 
@@ -38,6 +39,8 @@ async def validate_date(date_text, update: Update, context: ContextTypes.DEFAULT
 async def validate_info(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text == "Yes":
         print("Operation successful!")
+        await update.message.reply_text("Thank you for using our bot. The information is going to be saved")
+        insert_employee(user["id"], user["name"], user["birth"], user["location"], user["profession"])
         return ConversationHandler.END
     else:
         await update.message.reply_text("Let's try again")

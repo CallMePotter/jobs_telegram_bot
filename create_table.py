@@ -9,7 +9,7 @@ def create_table():
             id INT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             birth_date DATE NOT NULL,
-            city_country VARCHAR(255) NOT NULL,
+            location VARCHAR(255) NOT NULL,
             profession VARCHAR(255) NOT NULL
         ) 
         """,

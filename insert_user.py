@@ -1,9 +1,15 @@
 import psycopg2
 from config import config
 
-def insert_employee(id, name, birth_date, city_country, profession):
-    sql = """INSERT INTO employee(id, name, birth_date, city_country, profession)
-            VALUES(%s, %s, %s, %s, %s) RETURNING id"""
+def insert_employee(id, name, birth_date, location, profession):
+    sql = """INSERT INTO employee(id, name, birth_date, location, profession)
+            VALUES(%s, %s, %s, %s, %s) 
+            ON CONFLICT (id) DO UPDATE 
+                SET name = %s,
+                    birth_date = %s,
+                    location = %s,
+                    profession = %s
+            RETURNING id"""
     conn = None
     try:
         print("Connecting to database...")
@@ -15,7 +21,11 @@ def insert_employee(id, name, birth_date, city_country, profession):
         print("Connection sucessful")
 
         print("Exectuting commands")
-        cur.execute(sql, (id, name, birth_date, city_country, profession))
+        cur.execute(sql, (
+            id, name, birth_date, location, profession, 
+            name, birth_date, location, profession
+            )
+        )
         id = cur.fetchone()[0]
         conn.commit()
         print("Operation successful")
@@ -33,4 +43,4 @@ def insert_employee(id, name, birth_date, city_country, profession):
 
 
 if __name__ == '__main__':
-    insert_employee(1, 'Dmitriy', '06.04.2003', 'Yekaterinburg, Russia', 'programmer')
+    insert_employee(1, 'Dmitriy', '02.03.2003', 'Yekaterinburg, Russia', 'programmer')
